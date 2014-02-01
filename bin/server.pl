@@ -16,6 +16,9 @@ set_logger $logger;
 
 use Try::Tiny;
 
+use Harbinger::Schema;
+my $schema = Harbinger::Schema->connect('dbi:SQLite:harbinger.db');
+
 my $loop = IO::Async::Loop->new;
 
 my $s = IO::Socket::INET->new(
@@ -32,7 +35,20 @@ my $sock = IO::Async::Socket->new(
 
       my $client = $s->peerhost . ':' . $s->peerport;
 
-      try { decode_sereal($dgram) } catch { warn $_ };
+      try {
+         my $measurement = decode_sereal($dgram);
+         Dlog_info { "measurement received: $_" } $measurement;
+         $schema->resultset('Measurement')->create({
+            server => { name => delete $measurement->{server} },
+            ident  => { ident => delete $measurement->{ident} },
+
+            milliseconds_elapsed => $measurement->{ms},
+            pid => $measurement->{pid},
+            db_query_count => $measurement->{qc},
+         })
+      } catch {
+         log_warn { "failed to decode sereal: $_" } $_
+      };
    },
    on_recv_error => sub {
       my ( $self, $errno ) = @_;
