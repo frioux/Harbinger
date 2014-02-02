@@ -38,14 +38,18 @@ my $sock = IO::Async::Socket->new(
       try {
          my $measurement = decode_sereal($dgram);
          Dlog_info { "measurement received: $_" } $measurement;
-         $schema->resultset('Measurement')->create({
-            server => { name => delete $measurement->{server} },
-            ident  => { ident => delete $measurement->{ident} },
+         try {
+            $schema->resultset('Measurement')->create({
+               server => { name => delete $measurement->{server} },
+               ident  => { ident => delete $measurement->{ident} },
 
-            milliseconds_elapsed => $measurement->{ms},
-            pid => $measurement->{pid},
-            db_query_count => $measurement->{qc},
-         })
+               milliseconds_elapsed => $measurement->{ms},
+               pid => $measurement->{pid},
+               db_query_count => $measurement->{qc},
+            })
+         } catch {
+            log_warn { "failed to insert data into database: $_" } $_
+         }
       } catch {
          log_warn { "failed to decode sereal: $_" } $_
       };
