@@ -14,6 +14,7 @@ column measured_at => {
 
 column milliseconds_elapsed => { data_type => 'int' };
 column db_query_count => { data_type => 'int' };
+column memory_increase_in_kb => { data_type => 'int' };
 column pid => { data_type => 'int' };
 
 column server_id => { data_type => 'int' };

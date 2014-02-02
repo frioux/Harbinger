@@ -46,6 +46,7 @@ my $sock = IO::Async::Socket->new(
                milliseconds_elapsed => $measurement->{ms},
                pid => $measurement->{pid},
                db_query_count => $measurement->{qc},
+               memory_increase_in_kb => $measurement->{mg},
             })
          } catch {
             log_warn { "failed to insert data into database: $_" } $_
