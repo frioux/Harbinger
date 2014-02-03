@@ -7,6 +7,11 @@ primary_column id => {
    is_auto_increment => 1,
 };
 
+column count => {
+   data_type => 'int',
+   is_nullable => 1,
+};
+
 column measured_at => {
    data_type => 'datetime',
    set_on_create => 1,
