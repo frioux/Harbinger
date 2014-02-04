@@ -64,4 +64,28 @@ my $sock = IO::Async::Socket->new(
    },
 );
 $loop->add($sock);
+
+use Harbinger::Web;
+use Net::Async::HTTP::Server::PSGI;
+use Plack::Builder;
+
+my $app = Harbinger::Web->new->to_psgi_app;
+my $httpserver = Net::Async::HTTP::Server::PSGI->new(
+   app => builder {
+       enable 'Deflater';
+       enable 'AccessLog',
+         format => '%t %h "%r" %>s %b "%{Referer}i" ';;
+       $app
+   }
+);
+
+$loop->add( $httpserver );
+
+$httpserver->listen(
+   addr => { family => "inet6", socktype => "stream", port => 8080 },
+   on_listen_error => sub { die "Cannot listen - $_[-1]\n" },
+);
+
+say "server started";
 $loop->run;
+

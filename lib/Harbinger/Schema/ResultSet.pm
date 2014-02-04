@@ -11,6 +11,7 @@ __PACKAGE__->load_components(qw(
    Helper::ResultSet::ResultClassDWIM
    Helper::ResultSet::Me
    Helper::ResultSet::CorrelateRelationship
+   Helper::ResultSet::Shortcut
 ));
 
 1;
