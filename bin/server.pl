@@ -37,7 +37,12 @@ my $sock = IO::Async::Socket->new(
 
       try {
          my $measurement = decode_sereal($dgram);
-         Dlog_info { "measurement received: $_" } $measurement;
+         return unless $measurement->{server};
+         log_info {
+            my $a = shift;
+            sprintf "meas c:% 4i  ms:% 4i  $a->{server}:$a->{port} $a->{ident}",
+               $a->{c} || 0, $a->{ms}
+         } $measurement;
          try {
             $schema->resultset('Measurement')->create({
                server => { name => delete $measurement->{server} },
