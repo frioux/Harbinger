@@ -7,3 +7,4 @@ requires 'DBIx::Class';
 requires 'DBIx::Class::Helpers';
 requires 'DBIx::Class::Candy';
 requires 'Sereal::Decoder';
+requires 'Term::ANSIColor';

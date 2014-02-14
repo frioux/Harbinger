@@ -40,8 +40,9 @@ my $sock = IO::Async::Socket->new(
          return unless $measurement->{server};
          log_info {
             my $a = shift;
-            sprintf "meas c:% 4i  ms:% 4i  $a->{server}:$a->{port} $a->{ident}",
-               $a->{c} || 0, $a->{ms}
+            my $ms = _format_ms($a->{ms});
+            sprintf "meas c:% 4i  $ms  $a->{server}:$a->{port} $a->{ident}",
+               $a->{c} || 0;
          } $measurement;
          try {
             $schema->resultset('Measurement')->create({
@@ -70,3 +71,21 @@ my $sock = IO::Async::Socket->new(
 );
 $loop->add($sock);
 $loop->run;
+
+use Term::ANSIColor 'color';
+
+sub _format_ms {
+   my ($ms) = @_;
+
+   my $color;
+   if ($ms < 31) {
+      $color = 'white';
+   } elsif ($ms < 90) {
+      $color = 'green';
+   } elsif ($ms < 300) {
+      $color = 'yellow';
+   } else {
+      $color = 'red';
+   }
+   sprintf 'ms:%s% 5i%s', color($color), $ms, color 'reset'
+}
