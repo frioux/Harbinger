@@ -51,11 +51,11 @@ my $sock = IO::Async::Socket->new(
 
                milliseconds_elapsed => $measurement->{ms},
                pid => $measurement->{pid},
-               port => $measurement->{port},
-               db_query_count => $measurement->{qc},
-               memory_increase_in_kb => $measurement->{mg},
+               port => $measurement->{port} || 0,
+               db_query_count => $measurement->{qc} || 0,
+               memory_increase_in_kb => $measurement->{mg} || 0,
 
-               count => $measurement->{c},
+               count => $measurement->{c} || 0,
             })
          } catch {
             log_warn { "failed to insert data into database: $_" } $_

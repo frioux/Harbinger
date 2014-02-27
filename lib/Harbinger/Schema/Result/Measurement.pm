@@ -17,13 +17,28 @@ column measured_at => {
    set_on_create => 1,
 };
 
-column milliseconds_elapsed => { data_type => 'int' };
-column db_query_count => { data_type => 'int' };
-column memory_increase_in_kb => { data_type => 'int' };
-column pid => { data_type => 'int' };
-column port => { data_type => 'int' };
+column milliseconds_elapsed => {
+   data_type => 'int',
+   is_nullable => 1,
+};
+
+column db_query_count => {
+   data_type => 'int',
+   is_nullable => 1,
+};
+
+column memory_increase_in_kb => {
+   data_type => 'int',
+   is_nullable => 1,
+};
+
+column port => {
+   data_type => 'int',
+   is_nullable => 1,
+};
 
 column server_id => { data_type => 'int' };
+column pid => { data_type => 'int' };
 column ident_id => { data_type => 'int' };
 
 belongs_to server => '::Server', 'server_id';
