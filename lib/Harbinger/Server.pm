@@ -152,8 +152,10 @@ has _async_socket => (
 
 sub BUILD { shift->_async_socket; }
 
-sub DESTROY {
-   my $self = shift;
+sub DEMOLISH {
+   my ($self, $sky_is_falling) = @_;
+
+   return if $sky_is_falling;
 
    $self->_loop->remove($self->_async_socket);
 }
