@@ -1,0 +1,24 @@
+#!/usr/bin/env perl
+
+use 5.18.1;
+use warnings;
+
+use IO::Async::Loop;
+use Harbinger::Server;
+
+use Log::Contextual qw( set_logger );
+use Log::Log4perl ':easy';
+Log::Log4perl->easy_init($DEBUG);
+my $logger = Log::Log4perl->get_logger;
+set_logger $logger;
+
+my $loop = IO::Async::Loop->new;
+
+my $server = Harbinger::Server->new(
+   loop => $loop,
+   schema_connect_info => {
+      dsn => 'dbi:SQLite:harbinger.db',
+   },
+);
+
+$loop->run;

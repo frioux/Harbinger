@@ -1,24 +1,23 @@
 package Harbinger::Server;
 
 use Moo;
-
-use Sereal::Decoder qw(decode_sereal);
+use warnings NONFATAL => 'all';
 
 use Socket;
 use IO::Async::Socket;
 use IO::Async::Timer::Periodic;
-use Log::Contextual qw( :log :dlog set_logger with_logger );
-use Log::Log4perl ':easy';
-Log::Log4perl->easy_init($DEBUG);
-my $logger = Log::Log4perl->get_logger;
-set_logger $logger;
 
+use Sereal::Decoder qw(decode_sereal);
+use Log::Contextual qw( :log :dlog );
 use Try::Tiny;
+use Term::ANSIColor 'color';
 
 use Harbinger::Schema;
 
 sub _format_ms {
    my ($ms) = @_;
+
+   return 'ms:    ?' unless defined $ms;
 
    my $color;
    if ($ms < 31) {
@@ -31,6 +30,14 @@ sub _format_ms {
       $color = 'red';
    }
    sprintf 'ms:%s% 5i%s', color($color), $ms, color 'reset'
+}
+
+sub _format_c {
+   my ($c) = @_;
+
+   return 'c:   ?' unless defined $c;
+
+   sprintf 'ms:% 4i%s', $c
 }
 
 use namespace::clean;
@@ -53,11 +60,16 @@ has _udp_socket => (
    },
 );
 
+has schema_connect_info => (
+   is => 'ro',
+   required => 1,
+);
+
 has schema => (
    is => 'ro',
    lazy => 1,
    builder => sub {
-      Harbinger::Schema->connect('dbi:SQLite:harbinger.db');
+      Harbinger::Schema->connect(shift->schema_connect_info);
    },
 );
 
@@ -74,11 +86,11 @@ has _async_socket => (
       my $server = shift;
 
       my $sock = IO::Async::Socket->new(
-         handle => $s,
+         handle => $server->_udp_socket,
          on_recv => sub {
             my ( $self, $dgram, $addr ) = @_;
 
-            my $client = $s->peerhost . ':' . $s->peerport;
+            my $client = $server->_udp_socket->peerhost . ':' . $server->_udp_socket->peerport;
 
             try {
                my $measurement = decode_sereal($dgram);
@@ -86,8 +98,10 @@ has _async_socket => (
                log_info {
                   my $a = shift;
                   my $ms = _format_ms($a->{ms});
-                  sprintf "meas c:% 4i  $ms  $a->{server}:$a->{port} $a->{ident}",
-                     $a->{c} || 0;
+                  my $c = _format_c($a->{c});
+                  my $ident = $a->{ident};
+                  $ident = " $ident" unless $ident =~ m(^/);
+                  "$c  $ms  $a->{server}:$a->{port}$ident";
                } $measurement;
                try {
                   $server->schema->resultset('Measurement')->create({
