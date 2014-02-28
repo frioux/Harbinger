@@ -79,6 +79,53 @@ has _loop => (
    init_arg => 'loop',
 );
 
+sub _deserialize_measurement {
+   my ($self, $dgram) = @_;
+   my $measurement;
+   try {
+      $measurement = decode_sereal($dgram);
+      return unless
+         !defined $measurement->{server}
+      && !defined $measurement->{ident}
+      && !defined $measurement->{pid};
+
+      log_info {
+         my $a     = shift;
+         my $ms    = _format_ms($a->{ms});
+         my $c     = _format_c($a->{c});
+         my $ident = $a->{ident};
+         my $port  = $a->{port} || '';
+         $ident    = " $ident" unless $ident =~ m(^/);
+
+         "$c  $ms  $a->{server}:$port$ident";
+      } $measurement;
+   } catch {
+      log_warn { "failed to decode sereal: $_" } $_
+   };
+
+   return $measurement;
+}
+
+sub _create_measurement {
+   my ($self, $measurement) = @_;
+
+   try {
+      $self->schema->resultset('Measurement')->create({
+         server => { name  => delete $measurement->{server} },
+         ident  => { ident => delete $measurement->{ident}  },
+
+         milliseconds_elapsed  => $measurement->{ms},
+         pid                   => $measurement->{pid},
+         port                  => $measurement->{port},
+         db_query_count        => $measurement->{qc},
+         memory_increase_in_kb => $measurement->{mg},
+         count                 => $measurement->{c},
+      })
+   } catch {
+      log_error { "failed to insert data into database: $_" } $_
+   }
+}
+
 has _async_socket => (
    is => 'ro',
    lazy => 1,
@@ -90,38 +137,8 @@ has _async_socket => (
          on_recv => sub {
             my ( $self, $dgram, $addr ) = @_;
 
-            my $client = $server->_udp_socket->peerhost . ':' . $server->_udp_socket->peerport;
-
-            try {
-               my $measurement = decode_sereal($dgram);
-               return unless $measurement->{server};
-               log_info {
-                  my $a = shift;
-                  my $ms = _format_ms($a->{ms});
-                  my $c = _format_c($a->{c});
-                  my $ident = $a->{ident};
-                  $ident = " $ident" unless $ident =~ m(^/);
-                  "$c  $ms  $a->{server}:$a->{port}$ident";
-               } $measurement;
-               try {
-                  $server->schema->resultset('Measurement')->create({
-                     server => { name => delete $measurement->{server} },
-                     ident  => { ident => delete $measurement->{ident} },
-
-                     milliseconds_elapsed => $measurement->{ms},
-                     pid => $measurement->{pid},
-                     port => $measurement->{port},
-                     db_query_count => $measurement->{qc},
-                     memory_increase_in_kb => $measurement->{mg},
-
-                     count => $measurement->{c},
-                  })
-               } catch {
-                  log_warn { "failed to insert data into database: $_" } $_
-               }
-            } catch {
-               log_warn { "failed to decode sereal: $_" } $_
-            };
+            my $measurement = $server->_deserialize_measurement($dgram);
+            $server->_create_measurement($measurement) if $measurement;
          },
          on_recv_error => sub {
             my ( $self, $errno ) = @_;
