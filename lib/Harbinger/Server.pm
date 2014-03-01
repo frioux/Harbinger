@@ -84,10 +84,10 @@ sub _deserialize_measurement {
    my $measurement;
    try {
       $measurement = decode_sereal($dgram);
-      return unless
+      return if
          !defined $measurement->{server}
-      && !defined $measurement->{ident}
-      && !defined $measurement->{pid};
+      || !defined $measurement->{ident}
+      || !defined $measurement->{pid};
 
       log_info {
          my $a     = shift;
@@ -145,6 +145,7 @@ has _async_socket => (
             die "Cannot recv - $errno\n";
          },
       );
+      log_info { "listening on " . $server->port };
       $server->_loop->add($sock);
       $sock;
    },
