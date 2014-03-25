@@ -37,7 +37,7 @@ sub _format_c {
 
    return 'c:   ?' unless defined $c;
 
-   sprintf 'ms:% 4i%s', $c
+   sprintf 'c:% 4i', $c
 }
 
 use namespace::clean;
