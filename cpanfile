@@ -5,5 +5,6 @@ requires 'Try::Tiny';
 requires 'DBIx::Class';
 requires 'DBIx::Class::Helpers';
 requires 'DBIx::Class::Candy';
+requires 'DBIx::Class::TimeStamp';
 requires 'Sereal::Decoder';
 requires 'Term::ANSIColor';
