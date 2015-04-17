@@ -1,0 +1,12 @@
+#!/usr/bin/env perl
+
+use 5.18.1;
+use warnings;
+
+use Harbinger::Schema;
+
+my $schema = Harbinger::Schema->connect({
+   dsn => $ENV{DSN} || 'dbi:SQLite:harbinger.db',
+});
+
+$schema->deploy;

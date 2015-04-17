@@ -17,7 +17,7 @@ my $loop = IO::Async::Loop->new;
 my $server = Harbinger::Server->new(
    loop => $loop,
    schema_connect_info => {
-      dsn => 'dbi:SQLite:harbinger.db',
+      dsn => $ENV{DSN} || 'dbi:SQLite:harbinger.db',
    },
 );
 
