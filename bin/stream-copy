@@ -1,0 +1,38 @@
+#!/usr/bin/env perl
+
+use 5.18.1;
+use warnings;
+
+use Harbinger::Schema;
+
+my $from = Harbinger::Schema->connect({ dsn => $ENV{FROM_DSN} });
+my $to   = Harbinger::Schema->connect({ dsn => $ENV{TO_DSN} });
+
+for (qw( Server Ident )) {
+   my $old_rs = $from->resultset($_);
+   my $new_rs = $to->resultset($_);
+   $old_rs->result_class('DBIx::Class::ResultClass::HashRefInflator');
+   $new_rs->populate([$old_rs->all]);
+   say " -- copied $_";
+}
+
+{
+   my $old_rs = $from->resultset('Measurement')->search(undef, { order_by => 'id' });
+   my $new_rs = $to->resultset('Measurement');
+
+   my $max = $old_rs->count;
+
+   my $group_size = 10_000;
+   my $i = 1;
+   my $final = int($max / $group_size);
+   while ($i * $group_size < $max) {
+      say " -- copying Measurements $i / $final";
+      $new_rs->populate([
+         $old_rs->search(undef, {
+            page => $i++,
+            rows => $group_size,
+            result_class => 'DBIx::Class::ResultClass::HashRefInflator',
+         })->all
+      ]);
+   }
+}
