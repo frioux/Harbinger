@@ -8,7 +8,7 @@ primary_column id => {
 };
 
 unique_column name => {
-   data_type => 'nvarchar',
+   data_type => 'varchar',
    size      => 512,
 };
 

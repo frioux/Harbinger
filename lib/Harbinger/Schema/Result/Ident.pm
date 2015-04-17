@@ -8,7 +8,7 @@ primary_column id => {
 };
 
 unique_column ident => {
-   data_type => 'nvarchar',
+   data_type => 'varchar',
    size      => 512,
 };
 
