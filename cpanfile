@@ -8,3 +8,7 @@ requires 'DBIx::Class::Candy';
 requires 'DBIx::Class::TimeStamp';
 requires 'Sereal::Decoder';
 requires 'Term::ANSIColor';
+
+on test => sub {
+   requires 'Harbinger::Client';
+};

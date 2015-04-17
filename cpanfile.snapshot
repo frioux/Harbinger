@@ -1747,6 +1747,22 @@ DISTRIBUTIONS
       Test::Builder::Module 0
       Time::HiRes 0
       perl 5.008
+  Harbinger-Client-0.001001
+    pathname: F/FR/FREW/Harbinger-Client-0.001001.tar.gz
+    provides:
+      Catalyst::TraitFor::Controller::Harbinger 0.001001
+      Harbinger::Client 0.001001
+      Harbinger::Client::Doom 0.001001
+      Plack::Middleware::Harbinger 0.001001
+    requirements:
+      ExtUtils::MakeMaker 0
+      List::Util 0
+      Module::Runtime 0
+      Moo 0
+      Sereal::Encoder 0
+      Time::HiRes 0
+      Try::Tiny 0
+      namespace::clean 0
   Hash-Merge-0.200
     pathname: R/RE/REHSACK/Hash-Merge-0.200.tar.gz
     provides:
@@ -2393,6 +2409,17 @@ DISTRIBUTIONS
     provides:
       Sereal::Decoder 3.005
       Sereal::Performance undef
+    requirements:
+      ExtUtils::MakeMaker 7.0
+      ExtUtils::ParseXS 2.21
+      File::Find 0
+      File::Path 0
+      XSLoader 0
+      perl 5.008
+  Sereal-Encoder-3.005
+    pathname: Y/YV/YVES/Sereal-Encoder-3.005.tar.gz
+    provides:
+      Sereal::Encoder 3.005
     requirements:
       ExtUtils::MakeMaker 7.0
       ExtUtils::ParseXS 2.21

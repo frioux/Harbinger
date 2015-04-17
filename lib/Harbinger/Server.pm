@@ -51,7 +51,7 @@ has _udp_socket => (
    is => 'ro',
    lazy => 1,
    builder => sub {
-      IO::Socket::INET->new(
+      IO::Socket::IP->new(
          Proto => 'udp',
          ReuseAddr => 1,
          Type => SOCK_DGRAM,
